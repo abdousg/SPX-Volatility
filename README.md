@@ -1,25 +1,50 @@
 # SPX-Volatility
-Volatility surface and Term Structure of SPX Options
 
+This project focuses on constructing the **volatility surface** and **term structure** of SPX (S&P 500 Index) options using historical data. The goal is to estimate implied volatility across different strikes and maturities, and to visualize how volatility evolves both across the moneyness dimension and over time.
 
-Here is some information on how I approached the task:
+## Overview
 
-Database management:
-I chose to use the average of the bid and ask prices for each option, rather than the last traded price. To reduce the impact of outliers and avoid potential liquidity issues, I only included options with both a non-zero price and a non-zero trading volume. I then split the dataset into two subsets: one for call options and one for put options, so they could be processed separately.
-Cboe APIs were not accessible at the time I was working on the task. I know that having access to live data is essential for this kind of project. In the absence of an API, one alternative would have been web scraping, but this method raises stability and reliability issues, especially due to CAPTCHAs or changes in the website’s structure. Using APIs is clearly the proper and scalable approach for data retrieval. Since Cboe does not oJer free API access, this is definitely something I would reconsider in the future.
+The project includes:
 
-You will need the data from cboe.com/delayed_quotes/spx/quote_table
-- Select “Options Range” and “Expiration” to All, and click on “View Chain”
-- Scroll down to the bottom and download csv
+- Data preparation and cleaning
+- Black-Scholes model implementation
+- Implied volatility estimation using numerical methods
+- Visualization of the volatility surface and term structure
 
-Black Scholes implementation & missing inputs:
-While implementing the Black-Scholes model, I identified a few missing inputs: the risk- free rate, the historical volatility, and of course, the spot price of the S&P 500. Here is how I retrieved each of them:
-- Risk-free rate: I used the 13-week US Treasury yield.
-- Spot price: I pulled the real-time value from Yahoo Finance.
-- Historical volatility: I used the 2-month historical volatility of the SPDR S&P 500
-ETF (SPY), which closely tracks the S&P 500.
+## 1. Data Collection & Management
 
-Implied Volatility estimation:
-To compute the implied volatilities, I considered several numerical methods and ultimately chose the Newton-Raphson algorithm. Although it does not always guarantee convergence, it proved to be fast and eJective enough for the scope of this project.
-To run the code:
-Please run the “Execution.py” module. The volatility surface and the term structure will then appear in two diJerent windows.
+### Source
+Option chain data was obtained manually from the [Cboe SPX Quote Table](https://www.cboe.com/delayed_quotes/spx/quote_table):
+
+1. Set **Options Range** and **Expiration** to "All"
+2. Click "View Chain"
+3. Scroll down and download the CSV file
+
+### Preprocessing
+
+- Only options with **non-zero bid, ask, and volume** were retained to avoid illiquid contracts.
+- The **mid-price** (average of bid and ask) was used instead of the last traded price, to reduce noise and the impact of potential outliers.
+- Data was split into two subsets: **calls** and **puts**, processed separately.
+
+> Note: At the time of this project, Cboe APIs were not accessible. While web scraping was considered, its instability (CAPTCHAs, site structure changes) made it an unreliable solution. A future version should use API access to ensure scalability and robustness.
+
+## 2. Black-Scholes Model & Missing Inputs
+
+### Inputs & Assumptions
+
+- **Risk-free rate:** Approximated using the **13-week U.S. Treasury yield**
+- **Spot price:** Fetched in real-time from **Yahoo Finance** (S&P 500 index)
+- **Historical volatility:** Estimated using the **2-month historical volatility** of SPY, a highly liquid ETF tracking the S&P 500
+
+These inputs were used to compute theoretical prices and implied volatilities for each option.
+
+## 3. Implied Volatility Estimation
+
+To invert the Black-Scholes formula and retrieve implied volatility, the **Newton-Raphson algorithm** was implemented. Despite the risk of non-convergence, it offered a good balance between **speed and accuracy** for this project’s scope.
+
+## 4. How to Run
+
+To generate the plots for both the volatility surface and term structure:
+
+```bash
+python Execution.py
